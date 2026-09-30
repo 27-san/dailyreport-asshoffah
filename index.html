@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAYCARE AS-SHOFFAH - Dasbor Aktivitas Anak</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Grafik Pertumbuhan -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brandRed: '#DC2626',
+                        brandDarkRed: '#991B1B',
+                        brandYellow: '#FBBF24',
+                        brandGreen: '#34D399',
+                        brandBlue: '#60A5FA',
+                        brandPurple: '#A78BFA',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FEF2F2;
+        }
+    </style>
+</head>
+<body class="bg-red-50 text-gray-800 min-h-screen flex flex-col">
+
+    <div id="login-container" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border-4 border-red-500 w-full max-w-md p-8 relative overflow-hidden">
+            <!-- Elemen Dekorasi Warna-warni -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-300 rounded-full opacity-50 pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-300 rounded-full opacity-50 pointer-events-none"></div>
+
+            <div class="text-center mb-6 relative z-10">
+                <!-- Logo Simulasi Daycare As-Shoffah -->
+                <div class="mx-auto w-24 h-24 bg-gradient-to-tr from-red-500 via-yellow-400 to-green-400 rounded-full flex items-center justify-center shadow-lg border-4 border-white mb-3">
+                    <span class="text-white font-extrabold text-2xl tracking-tighter">AS</span>
+                </div>
+                <h1 class="text-2xl font-bold text-red-600">DAYCARE AS-SHOFFAH</h1>
+                <p class="text-sm text-gray-500 mt-1">Silakan Masuk untuk Memantau Buah Hati Tercinta</p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap Anak</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-red-500"><i class="fa-solid fa-child"></i></span>
+                        <input type="text" id="login-name" required placeholder="Contoh: Fatimah Zahra" 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password (Tanggal Lahir Anak)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-red-500"><i class="fa-solid fa-calendar-days"></i></span>
+                        <input type="date" id="login-pass" required 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">*Format password: Tanggal lahir anak (Misal: 2023-03-15)</p>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition duration-300 transform hover:scale-[1.02]">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Masuk Dasbor
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-gray-400">
+                Demo Akun Tersedia:<br>
+                1. Nama: <b class="text-gray-600">Fatimah Zahra</b> | Tgl Lahir: <b class="text-gray-600">2023-03-15</b><br>
+                2. Nama: <b class="text-gray-600">Muhammad Umar</b> | Tgl Lahir: <b class="text-gray-600">2022-08-20</b>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-container" class="hidden flex-grow flex flex-col">
+        <!-- Header Navbar -->
+        <header class="bg-gradient-to-r from-red-600 via-pink-500 to-yellow-500 text-white shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-yellow-300 text-red-600 font-bold text-lg">
+                        AS
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold tracking-wide">DAYCARE AS-SHOFFAH</h2>
+                        <p class="text-xs text-yellow-100">Dasbor Aktivitas Harian & Tumbuh Kembang Anak</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 flex-wrap justify-center">
+                    <button onclick="openTeacherModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl text-sm shadow transition flex items-center">
+                        <i class="fa-solid fa-pen-to-square mr-1.5"></i> Input Guru
+                    </button>
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center space-x-2 text-sm">
+                        <i class="fa-solid fa-user-circle text-yellow-300 text-lg"></i>
+                        <span id="header-child-name" class="font-semibold">Nama Anak</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-white text-red-600 hover:bg-red-50 font-semibold px-4 py-2 rounded-xl text-sm shadow transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Menu Tab / Slider Navigation Atas -->
+        <nav class="bg-white shadow border-b border-gray-200 sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-2 py-3">
+                <button onclick="switchTab('slide1')" id="btn-slide1" class="whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-red-600 text-white shadow transition flex items-center">
+                    <i class="fa-solid fa-child-reaching mr-2"></i> Biodata & Daily Report
+                </button>
+                <button onclick="switchTab('slide2')" id="btn-slide2" class="whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 transition flex items-center">
+                    <i class="fa-solid fa-chart-line mr-2"></i> Grafik Pertumbuhan
+                </button>
+                <button onclick="switchTab('slide3')" id="btn-slide3" class="whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 transition flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> Rekap Jam Kedatangan
+                </button>
+                <button onclick="switchTab('slide4')" id="btn-slide4" class="whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 transition flex items-center">
+                    <i class="fa-solid fa-comments mr-2"></i> Komunikasi Guru & Orang Tua
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Slides -->
+        <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+            
+            <!-- SLIDE 1: Biodata Anak & Daily Report -->
+            <div id="slide1" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Kolom Kiri: Biodata & Kehadiran Ringkas -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-xl border-t-4 border-red-500 relative">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold text-red-600 flex items-center">
+                                <i class="fa-solid fa-id-card mr-2 text-yellow-500"></i> Biodata Anak
+                            </h3>
+                            <span class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-semibold">Aktif Hari Ini</span>
+                        </div>
+
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">Nama Lengkap</span>
+                                <span id="bio-name" class="font-semibold text-gray-800">-</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">Tanggal Lahir / Umur</span>
+                                <span id="bio-dob" class="font-semibold text-gray-800">-</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">Nama Ayah / Ibu</span>
+                                <span id="bio-parents" class="font-semibold text-gray-800">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Daily Report Kegiatan -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-xl border-t-4 border-green-400">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+                            <div>
+                                <h3 class="text-xl font-bold text-red-600 flex items-center">
+                                    <i class="fa-solid fa-sun mr-2 text-yellow-500"></i> Daily Report Kegiatan Harian
+                                </h3>
+                                <p class="text-xs text-gray-500">Catatan aktivitas lengkap buah hati di Daycare As-Shoffah</p>
+                            </div>
+                            <input type="date" id="report-date" onchange="loadDailyReport()" class="border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-50 text-red-700 font-semibold">
+                        </div>
+
+                        <div class="space-y-4" id="activities-container">
+                            <!-- Di-generate dinamis -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Grafik Pertumbuhan -->
+            <div id="slide2" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-t-4 border-yellow-400">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-red-600 flex items-center">
+                            <i class="fa-solid fa-chart-line mr-2 text-green-500"></i> Grafik Pertumbuhan & Pengukuran Bulanan
+                        </h3>
+                        <button onclick="openGrowthModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shadow transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Data Bulanan
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-6">
+                        <div class="bg-blue-50 p-3 rounded-2xl shadow-sm">
+                            <span class="text-xs text-gray-500 block">Tinggi Badan (TB)</span>
+                            <span id="stat-tb" class="font-bold text-blue-600 text-base">-</span>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-2xl shadow-sm">
+                            <span class="text-xs text-gray-500 block">Berat Badan (BB)</span>
+                            <span id="stat-bb" class="font-bold text-green-600 text-base">-</span>
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded-2xl shadow-sm">
+                            <span class="text-xs text-gray-500 block">Lingkar Lengan</span>
+                            <span id="stat-arm" class="font-bold text-yellow-600 text-base">-</span>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-2xl shadow-sm">
+                            <span class="text-xs text-gray-500 block">Lingkar Kepala</span>
+                            <span id="stat-head" class="font-bold text-purple-600 text-base">-</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-80 bg-white p-4 rounded-2xl border">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Rekap Jam Kedatangan & Penjemputan -->
+            <div id="slide3" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-t-4 border-blue-500">
+                    <h3 class="text-xl font-bold text-red-600 flex items-center mb-4">
+                        <i class="fa-solid fa-clock-rotate-left mr-2 text-blue-500"></i> Rekapan Jam Kedatangan & Penjemputan Bulanan
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-6">Catatan kehadiran tepat waktu harian buah hati di Daycare As-Shoffah.</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-red-50 text-red-700 text-xs uppercase font-bold">
+                                    <th class="p-3 rounded-l-xl">Tanggal</th>
+                                    <th class="p-3">Jam Kedatangan</th>
+                                    <th class="p-3">Jam Penjemputan</th>
+                                    <th class="p-3 rounded-r-xl">Status Kehadiran</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body" class="text-sm divide-y">
+                                <!-- Di-generate dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: Komunikasi Guru & Orang Tua -->
+            <div id="slide4" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-t-4 border-purple-500">
+                    <h3 class="text-xl font-bold text-red-600 flex items-center mb-4">
+                        <i class="fa-solid fa-comments mr-2 text-purple-500"></i> Buku Komunikasi Guru Pendamping & Orang Tua
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-4">Tanyakan perkembangan anak atau sampaikan catatan khusus kepada guru pendamping.</p>
+                    
+                    <div class="bg-blue-50 rounded-2xl p-4 mb-4 h-80 overflow-y-auto space-y-3" id="chat-messages">
+                        <!-- Pesan chat komunikasi -->
+                    </div>
+
+                    <form onsubmit="sendCommunication(event)" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Tulis pesan/catatan untuk guru atau orang tua..." 
+                            class="flex-grow border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow transition flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> Kirim
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-red-900 text-white text-center py-4 mt-auto text-xs">
+            <p>&copy; 2026 DAYCARE AS-SHOFFAH. All Rights Reserved. Ceria, Islami, & Menyenangkan!</p>
+        </footer>
+    </div>
+
+    <!-- Modal Tambah Data Tumbuh Kembang -->
+    <div id="growth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-yellow-400 relative">
+            <h3 class="text-lg font-bold text-red-600 mb-4 flex items-center">
+                <i class="fa-solid fa-weight-scale mr-2"></i> Tambah Data Tumbuh Kembang Bulanan
+            </h3>
+            
+            <form onsubmit="saveGrowthData(event)" class="space-y-3 text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Bulan Pengukuran</label>
+                    <input type="text" id="modal-month" required placeholder="Contoh: November 2026" class="w-full border rounded-xl px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Tinggi Badan (TB cm)</label>
+                        <input type="number" step="0.1" id="modal-tb" required placeholder="95.5" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Berat Badan (BB kg)</label>
+                        <input type="number" step="0.1" id="modal-bb" required placeholder="14.2" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Lingkar Lengan (cm)</label>
+                        <input type="number" step="0.1" id="modal-arm" required placeholder="15.0" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Lingkar Kepala (cm)</label>
+                        <input type="number" step="0.1" id="modal-head" required placeholder="48.0" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeGrowthModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold">Batal</button>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl font-semibold shadow">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Input/Edit Guru untuk Daily Report Harian -->
+    <div id="teacher-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-blue-500 relative max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-red-600 mb-4 flex items-center">
+                <i class="fa-solid fa-pen-to-square mr-2"></i> Input / Edit Daily Report Guru
+            </h3>
+            
+            <form onsubmit="saveTeacherReport(event)" class="space-y-4 text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Pilih Tanggal Laporan</label>
+                    <input type="date" id="t-date" required class="w-full border rounded-xl px-3 py-2 bg-red-50 text-red-700 font-semibold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Jam Kedatangan</label>
+                        <input type="text" id="t-checkin" value="07:30 WIB" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Jam Penjemputan</label>
+                        <input type="text" id="t-checkout" value="16:00 WIB" class="w-full border rounded-xl px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-2"><i class="fa-solid fa-sun text-yellow-500 mr-1"></i> 1. Sirkeltime (Morning Circle)</h4>
+                    <input type="text" id="t-sirkel-desc" placeholder="Keterangan kegiatan sirkeltime..." class="w-full border rounded-xl px-3 py-2 mb-2">
+                    <input type="url" id="t-sirkel-img" placeholder="URL Foto (Opsional, biarkan kosong untuk default)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-2"><i class="fa-solid fa-book text-blue-500 mr-1"></i> 2. Kegiatan Belajar</h4>
+                    <input type="text" id="t-belajar-desc" placeholder="Keterangan kegiatan belajar..." class="w-full border rounded-xl px-3 py-2 mb-2">
+                    <input type="url" id="t-belajar-img" placeholder="URL Foto (Opsional)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-2"><i class="fa-solid fa-utensils text-green-500 mr-1"></i> 3. Makan Siang Sehat</h4>
+                    <input type="text" id="t-makan-desc" placeholder="Menu dan seberapa banyak dihabiskan..." class="w-full border rounded-xl px-3 py-2 mb-2">
+                    <input type="url" id="t-makan-img" placeholder="URL Foto (Opsional)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-2"><i class="fa-solid fa-bed text-indigo-500 mr-1"></i> 4. Tidur Siang</h4>
+                    <input type="text" id="t-tidur-desc" placeholder="Keterangan tidur siang..." class="w-full border rounded-xl px-3 py-2 mb-2">
+                    <input type="url" id="t-tidur-img" placeholder="URL Foto (Opsional)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-2"><i class="fa-solid fa-futbol text-purple-500 mr-1"></i> 5. Kegiatan Sore</h4>
+                    <input type="text" id="t-sore-desc" placeholder="Keterangan kegiatan sore..." class="w-full border rounded-xl px-3 py-2 mb-2">
+                    <input type="url" id="t-sore-img" placeholder="URL Foto (Opsional)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeTeacherModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold">Batal</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold shadow">Simpan Laporan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Database Simulasi Data Anak Daycare As-Shoffah
+        const daycareDatabase = [
+            {
+                name: "Fatimah Zahra",
+                dob: "2023-03-15",
+                father: "Bpk. Ahmad Fauzi",
+                mother: "Ibu Siti Aminah",
+                attendance: [
+                    { date: "2026-10-01", checkIn: "07:30 WIB", checkOut: "16:00 WIB", status: "Hadir Tepat Waktu" },
+                    { date: "2026-09-30", checkIn: "07:25 WIB", checkOut: "16:10 WIB", status: "Hadir Tepat Waktu" },
+                    { date: "2026-09-29", checkIn: "07:40 WIB", checkOut: "16:00 WIB", status: "Hadir" },
+                    { date: "2026-09-28", checkIn: "07:30 WIB", checkOut: "15:55 WIB", status: "Hadir Tepat Waktu" }
+                ],
+                growthRecords: [
+                    { month: "Juli 2026", tb: 85, bb: 11.5, arm: 13.5, head: 46 },
+                    { month: "Agustus 2026", tb: 86, bb: 12.0, arm: 13.8, head: 46.5 },
+                    { month: "September 2026", tb: 87.2, bb: 12.5, arm: 14.0, head: 47 },
+                    { month: "Oktober 2026", tb: 88, bb: 12.8, arm: 14.2, head: 47.2 }
+                ],
+                reports: {
+                    "2026-10-01": [
+                        { title: "Sirkeltime (Morning Circle)", time: "08:00 - 08:30", desc: "Anak-anak bernyanyi lagu islami bersama, melatih motorik halus, dan berdoa pagi dengan gembira.", photo: "https://placehold.co/400x250/FF8080/FFFFFF?text=Sirkeltime+Ceria" },
+                        { title: "Kegiatan Belajar & Motorik", time: "08:30 - 10:30", desc: "Mengenal warna-warna pelangi menggunakan balok susun dan melukis jari (finger painting).", photo: "https://placehold.co/400x250/FFD700/333333?text=Belajar+Warna" },
+                        { title: "Makan Siang Sehat", time: "11:30 - 12:30", desc: "Menu hari ini: Nasi tim ayam kampung, sayur bayam, dan buah pisang manis. Fatimah menghabiskan 1 porsi!", photo: "https://placehold.co/400x250/34D399/FFFFFF?text=Makan+Siang+Sehat" },
+                        { title: "Tidur Siang", time: "13:00 - 15:00", desc: "Tidur siang sangat nyenyak selama 2 jam dengan suasana ruangan sejuk dan alunan murotal.", photo: "https://placehold.co/400x250/60A5FA/FFFFFF?text=Waktu+Tidur+Siang" },
+                        { title: "Kegiatan Sore", time: "15:30 - 16:30", desc: "Bermain lego interaktif di halaman indoor, merapikan mainan bersama teman-teman sebelum dijemput.", photo: "https://placehold.co/400x250/A78BFA/FFFFFF?text=Bermain+Sore" }
+                    ]
+                },
+                messages: [
+                    { sender: "Guru Pendamping (Bunda Rina)", text: "Alhamdulillah hari ini Fatimah sangat aktif dan ceria saat kegiatan sirkeltime.", time: "09:15" },
+                    { sender: "Bunda (Orang Tua)", text: "Alhamdulillah, terima kasih banyak Bunda Rina atas bimbingannya hari ini.", time: "10:00" }
+                ]
+            },
+            {
+                name: "Muhammad Umar",
+                dob: "2022-08-20",
+                father: "Bpk. Rizki Pratama",
+                mother: "Ibu Dian Sastrowi",
+                attendance: [
+                    { date: "2026-10-01", checkIn: "07:15 WIB", checkOut: "16:15 WIB", status: "Hadir Tepat Waktu" },
+                    { date: "2026-09-30", checkIn: "07:20 WIB", checkOut: "16:00 WIB", status: "Hadir Tepat Waktu" }
+                ],
+                growthRecords: [
+                    { month: "Juli 2026", tb: 90, bb: 13.0, arm: 14.0, head: 48 },
+                    { month: "Agustus 2026", tb: 91, bb: 13.5, arm: 14.3, head: 48.2 },
+                    { month: "September 2026", tb: 92.5, bb: 14.0, arm: 14.5, head: 48.5 },
+                    { month: "Oktober 2026", tb: 93, bb: 14.3, arm: 14.8, head: 48.8 }
+                ],
+                reports: {
+                    "2026-10-01": [
+                        { title: "Sirkeltime (Morning Circle)", time: "08:00 - 08:30", desc: "Umar memimpin doa pembuka belajar dengan suara lantang dan penuh percaya diri.", photo: "https://placehold.co/400x250/FF8080/FFFFFF?text=Sirkeltime+Umar" },
+                        { title: "Kegiatan Belajar & Motorik", time: "08:30 - 10:30", desc: "Belajar menghitung angka 1 sampai 10 menggunakan kartu bergambar hewan.", photo: "https://placehold.co/400x250/FFD700/333333?text=Belajar+Angka" },
+                        { title: "Makan Siang Sehat", time: "11:30 - 12:30", desc: "Makan lahap dengan menu sup ikan dan tahu goreng.", photo: "https://placehold.co/400x250/34D399/FFFFFF?text=Makan+Siang" },
+                        { title: "Tidur Siang", time: "13:00 - 15:00", desc: "Tidur tepat waktu dan bangun dengan segar ceria.", photo: "https://placehold.co/400x250/60A5FA/FFFFFF?text=Tidur+Siang" },
+                        { title: "Kegiatan Sore", time: "15:30 - 16:30", desc: "Bermain balok susun besar membuat menara masjid.", photo: "https://placehold.co/400x250/A78BFA/FFFFFF?text=Bermain+Sore" }
+                    ]
+                },
+                messages: [
+                    { sender: "Guru Pendamping (Bunda Siti)", text: "Umar hari ini hebat, makan siangnya habis tanpa sisa.", time: "12:45" }
+                ]
+            }
+        ];
+
+        let currentChild = null;
+        let growthChartInstance = null;
+
+        // Fungsi Navigasi Tab / Slider Atas
+        function switchTab(slideId) {
+            // Sembunyikan semua konten tab
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.add('hidden'));
+
+            // Reset semua tombol tab ke style default
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`btn-slide${i}`);
+                btn.className = "whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 transition flex items-center";
+            }
+
+            // Tampilkan tab yang dipilih
+            document.getElementById(slideId).classList.remove('hidden');
+
+            // Aktifkan style tombol terpilih
+            const activeBtn = document.getElementById(`btn-${slideId}`);
+            activeBtn.className = "whitespace-nowrap px-5 py-2.5 rounded-2xl font-bold text-sm bg-red-600 text-white shadow transition flex items-center";
+        }
+
+        // Fungsi Login
+        function handleLogin(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('login-name').value.trim().toLowerCase();
+            const passInput = document.getElementById('login-pass').value;
+
+            const foundChild = daycareDatabase.find(c => 
+                c.name.toLowerCase() === nameInput && c.dob === passInput
+            );
+
+            if (foundChild) {
+                currentChild = foundChild;
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('dashboard-container').classList.remove('hidden');
+                
+                initDashboard();
+            } else {
+                alert("Nama anak atau password tanggal lahir salah! Silakan periksa kembali (Contoh: Fatimah Zahra / 2023-03-15).");
+            }
+        }
+
+        // Fungsi Logout
+        function handleLogout() {
+            currentChild = null;
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('login-form').reset();
+        }
+
+        // Inisialisasi Komponen Dasbor
+        function initDashboard() {
+            document.getElementById('header-child-name').innerText = currentChild.name;
+            document.getElementById('bio-name').innerText = currentChild.name;
+            document.getElementById('bio-dob').innerText = `${currentChild.dob} (${calculateAge(currentChild.dob)})`;
+            document.getElementById('bio-parents').innerText = `${currentChild.father} / ${currentChild.mother}`;
+
+            const today = "2026-10-01";
+            document.getElementById('report-date').value = today;
+            document.getElementById('t-date').value = today;
+
+            loadDailyReport();
+            updateGrowthStatsAndChart();
+            loadAttendanceTable();
+            loadMessages();
+            switchTab('slide1');
+        }
+
+        // Hitung Umur Berdasarkan Tanggal Lahir
+        function calculateAge(dobString) {
+            const dob = new Date(dobString);
+            const now = new Date(2026, 9, 1);
+            let years = now.getFullYear() - dob.getFullYear();
+            let months = now.getMonth() - dob.getMonth();
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            return `${years} Tahun ${months} Bulan`;
+        }
+
+        // Load Daily Report
+        function loadDailyReport() {
+            const dateVal = document.getElementById('report-date').value || "2026-10-01";
+            const container = document.getElementById('activities-container');
+            container.innerHTML = "";
+
+            const reports = currentChild.reports[dateVal] || [
+                { title: "Sirkeltime (Morning Circle)", time: "08:00 - 08:30", desc: "Kegiatan pagi bernyanyi dan berdoa bersama.", photo: "https://placehold.co/400x250/FF8080/FFFFFF?text=Sirkeltime" },
+                { title: "Kegiatan Belajar & Motorik", time: "08:30 - 10:30", desc: "Belajar sambil bermain edukatif.", photo: "https://placehold.co/400x250/FFD700/333333?text=Belajar" },
+                { title: "Makan Siang Sehat", time: "11:30 - 12:30", desc: "Makan siang bergizi seimbang.", photo: "https://placehold.co/400x250/34D399/FFFFFF?text=Makan+Siang" },
+                { title: "Tidur Siang", time: "13:00 - 15:00", desc: "Istirahat siang anak-anak.", photo: "https://placehold.co/400x250/60A5FA/FFFFFF?text=Tidur+Siang" },
+                { title: "Kegiatan Sore", time: "15:30 - 16:30", desc: "Bermain interaktif sore hari.", photo: "https://placehold.co/400x250/A78BFA/FFFFFF?text=Kegiatan+Sore" }
+            ];
+
+            const colors = ['border-red-400 bg-red-50/50', 'border-yellow-400 bg-yellow-50/50', 'border-green-400 bg-green-50/50', 'border-blue-400 bg-blue-50/50', 'border-purple-400 bg-purple-50/50'];
+
+            reports.forEach((rep, index) => {
+                const card = document.createElement('div');
+                card.className = `border-l-4 ${colors[index % colors.length]} rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center bg-white`;
+                card.innerHTML = `
+                    <div class="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-xl shadow">
+                        <img src="${rep.photo}" alt="${rep.title}" class="w-full h-full object-cover hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x250/EE5253/FFFFFF?text=Daycare'">
+                    </div>
+                    <div class="flex-grow w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-gray-800 text-base">${rep.title}</h4>
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-semibold"><i class="fa-solid fa-clock mr-1"></i>${rep.time}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">${rep.desc}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Load Attendance Table
+        function loadAttendanceTable() {
+            const tbody = document.getElementById('attendance-table-body');
+            tbody.innerHTML = "";
+
+            currentChild.attendance.forEach(att => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-red-50/50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-gray-700">${att.date}</td>
+                    <td class="p-3 text-red-600 font-bold"><i class="fa-solid fa-clock mr-1"></i>${att.checkIn}</td>
+                    <td class="p-3 text-blue-600 font-bold"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${att.checkOut}</td>
+                    <td class="p-3"><span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">${att.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Statistik & Grafik Chart.js
+        function updateGrowthStatsAndChart() {
+            const records = currentChild.growthRecords;
+            const latest = records[records.length - 1];
+
+            document.getElementById('stat-tb').innerText = latest.tb + " cm";
+            document.getElementById('stat-bb').innerText = latest.bb + " kg";
+            document.getElementById('stat-arm').innerText = latest.arm + " cm";
+            document.getElementById('stat-head').innerText = latest.head + " cm";
+
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (growthChartInstance) {
+                growthChartInstance.destroy();
+            }
+
+            growthChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: records.map(r => r.month),
+                    datasets: [
+                        {
+                            label: 'Tinggi Badan (cm)',
+                            data: records.map(r => r.tb),
+                            borderColor: '#3B82F6',
+                            backgroundColor: '#3B82F6',
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Berat Badan (kg)',
+                            data: records.map(r => r.bb),
+                            borderColor: '#10B981',
+                            backgroundColor: '#10B981',
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'TB (cm)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'BB (kg)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Modal Kontrol Tumbuh Kembang
+        function openGrowthModal() {
+            document.getElementById('growth-modal').classList.remove('hidden');
+            document.getElementById('growth-modal').classList.add('flex');
+        }
+
+        function closeGrowthModal() {
+            document.getElementById('growth-modal').classList.add('hidden');
+            document.getElementById('growth-modal').classList.remove('flex');
+        }
+
+        function saveGrowthData(event) {
+            event.preventDefault();
+            const month = document.getElementById('modal-month').value;
+            const tb = parseFloat(document.getElementById('modal-tb').value);
+            const bb = parseFloat(document.getElementById('modal-bb').value);
+            const arm = parseFloat(document.getElementById('modal-arm').value);
+            const head = parseFloat(document.getElementById('modal-head').value);
+
+            currentChild.growthRecords.push({ month, tb, bb, arm, head });
+            updateGrowthStatsAndChart();
+            closeGrowthModal();
+            alert("Data tumbuh kembang bulan " + month + " berhasil ditambahkan!");
+        }
+
+        // Modal Kontrol Input Guru
+        function openTeacherModal() {
+            document.getElementById('teacher-modal').classList.remove('hidden');
+            document.getElementById('teacher-modal').classList.add('flex');
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacher-modal').classList.add('hidden');
+            document.getElementById('teacher-modal').classList.remove('flex');
+        }
+
+        function saveTeacherReport(event) {
+            event.preventDefault();
+            const dateStr = document.getElementById('t-date').value;
+            const checkIn = document.getElementById('t-checkin').value;
+            const checkOut = document.getElementById('t-checkout').value;
+            
+            const sirkelDesc = document.getElementById('t-sirkel-desc').value || "Kegiatan sirkeltime pagi hari.";
+            const sirkelImg = document.getElementById('t-sirkel-img').value || "https://placehold.co/400x250/FF8080/FFFFFF?text=Sirkeltime";
+
+            const belajarDesc = document.getElementById('t-belajar-desc').value || "Kegiatan belajar edukatif.";
+            const belajarImg = document.getElementById('t-belajar-img').value || "https://placehold.co/400x250/FFD700/333333?text=Belajar";
+
+            const makanDesc = document.getElementById('t-makan-desc').value || "Makan siang dengan menu bergizi.";
+            const makanImg = document.getElementById('t-makan-img').value || "https://placehold.co/400x250/34D399/FFFFFF?text=Makan+Siang";
+
+            const tidurDesc = document.getElementById('t-tidur-desc').value || "Tidur siang nyenyak.";
+            const tidurImg = document.getElementById('t-tidur-img').value || "https://placehold.co/400x250/60A5FA/FFFFFF?text=Tidur+Siang";
+
+            const soreDesc = document.getElementById('t-sore-desc').value || "Bermain interaktif sore.";
+            const soreImg = document.getElementById('t-sore-img').value || "https://placehold.co/400x250/A78BFA/FFFFFF?text=Kegiatan+Sore";
+
+            currentChild.reports[dateStr] = [
+                { title: "Sirkeltime (Morning Circle)", time: "08:00 - 08:30", desc: sirkelDesc, photo: sirkelImg },
+                { title: "Kegiatan Belajar & Motorik", time: "08:30 - 10:30", desc: belajarDesc, photo: belajarImg },
+                { title: "Makan Siang Sehat", time: "11:30 - 12:30", desc: makanDesc, photo: makanImg },
+                { title: "Tidur Siang", time: "13:00 - 15:00", desc: tidurDesc, photo: tidurImg },
+                { title: "Kegiatan Sore", time: "15:30 - 16:30", desc: soreDesc, photo: soreImg }
+            ];
+
+            // Update attendance
+            const existingAtt = currentChild.attendance.find(a => a.date === dateStr);
+            if (existingAtt) {
+                existingAtt.checkIn = checkIn;
+                existingAtt.checkOut = checkOut;
+            } else {
+                currentChild.attendance.unshift({ date: dateStr, checkIn, checkOut, status: "Hadir" });
+            }
+
+            document.getElementById('report-date').value = dateStr;
+            loadDailyReport();
+            loadAttendanceTable();
+            closeTeacherModal();
+            alert("Daily report & jam kehadiran untuk tanggal " + dateStr + " berhasil disimpan!");
+        }
+
+        // Komunikasi Chat Guru & Orang Tua
+        function loadMessages() {
+            const chatContainer = document.getElementById('chat-messages');
+            chatContainer.innerHTML = "";
+
+            currentChild.messages.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-2xl shadow-sm border border-purple-100";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-red-600">${msg.sender}</span>
+                        <span class="text-[10px] text-gray-400">${msg.time}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">${msg.text}</p>
+                `;
+                chatContainer.appendChild(div);
+            });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendCommunication(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+
+            currentChild.messages.push({
+                sender: "Orang Tua (" + currentChild.mother + ")",
+                text: text,
+                time: timeStr
+            });
+
+            input.value = "";
+            loadMessages();
+        }
+    </script>
+</body>
+</html>
